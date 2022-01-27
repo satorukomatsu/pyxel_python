@@ -70,3 +70,69 @@ class App:
             y = randint(8, 104)
             is_alive = True
         return x, y, is_alive
+
+    def update_fruit(self, x, y, kind, is_alive):
+        if is_alive and abs(x - self.player_x) < 12 and abs(y - self.player_y) < 12:
+            is_alive = False
+            self.score += (kind + 1) * 100
+            self.player_dy = min(self.player_dy, -8)
+            pyxel.play(3, 4)
+        x -= 2
+        if x < -40:
+            x += 240
+            y = randint(0, 2)
+            is_alive = True
+        return (x, y, kind, is_alive)
+
+    def draw(self):
+        pyxel.cls(12)
+
+        # draw sky
+        pyxel.blt(0, 88, 0, 0, 88, 160, 32)
+
+        # draw mountain
+        pyxel.blt(0, 88, 0, 0, 64, 160, 24, 12)
+
+        # draw trees
+        offset = pyxel.frame_count % 160
+        for i in range(2):
+            pyxel.blt(i * 160 - offset, 104, 0, 0, 48, 160, 16, 12)
+
+        # draw clouds
+        offset = (pyxel.frame_count // 16) % 160
+        for i in range(2):
+            for x, y in self.far_cloud:
+                pyxel.blt(x + i * 160 - offset, y, 0, 64, 32, 32, 8, 12)
+        offset = (pyxel.frame_count // 8) % 160
+        for i in range(2):
+            for x, y in self.near_cloud:
+                pyxel.blt(x + i * 160 - offset, y, 0, 0, 32, 56, 8, 12)
+
+        # draw floors
+        for x, y, is_alive in self.floor:
+            pyxel.blt(x, y, 0, 0, 16, 40, 8, 12)
+
+        # draw fruits
+        for x, y, kind, is_alive in self.fruit:
+            if is_alive:
+                pyxel.blt(x, y, 0, 32 + kind * 16, 0, 16, 16, 12)
+
+        # draw player
+        pyxel.blt(
+            self.player_x,
+            self.player_y,
+            0,
+            16 if self.player_dy > 0 else 0,
+            0,
+            16,
+            16,
+            12,
+        )
+
+        # draw score
+        s = f"SCORE {self.score:>4}"
+        pyxel.text(5, 4, s, 1)
+        pyxel.text(4, 4, s, 7)
+
+
+App()
